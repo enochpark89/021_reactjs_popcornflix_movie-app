@@ -202,7 +202,7 @@ export default globalStyles;
 5. the Globalstyle is now applied on the website and the background is black.
 6. Change the CSS of the header.js
 
-# 1.3c Location aware Header.
+## 1.3c Location aware Header.
 
 -  Give Header Props:
 
@@ -342,3 +342,269 @@ export const moviesApi = {
          },
       }),
 ```
+
+# 1.5 Containers
+
+## 1.5a Container Presenter Pattern
+
+-  We need to have three pages displaying different API data results.
+-  Normally, you use class component and state to render API data. This works when your application is tiny.
+   -  Class compoenent and State > Mount > render data.
+-  **Container-Presenter pattern**: Container contains data, state, API, process data. Presenter shows and presents the data that has been processed but it does not have any information about the API and data. It simply receives the data and present it.
+
+**Folder structure**:
+
+-  Routes
+   -  Home
+      -  HomePresenter.js
+      -  HomeContainer.js
+
+HomeContainer.js:
+
+Steps:
+
+1. import React and HomePresenter.
+2. State creates 5 different properties that will be used in the React.Component.
+
+```js
+export default class extends
+React.Component {
+   state = {
+      nowPlaying: null,
+      upcoming: null,
+      popular: null,
+      error: null,
+      loading: true,
+   };
+```
+
+3. render() takes 5 properties in this.state and use them to assign values that we received from the API.
+
+```js
+   render() {
+      const { nowPlaying, upcoming, popular, error, loading } = this.state;
+      return (
+         <HomePresenter
+            nowPlaying={nowPlaying}
+            upcoming={upcoming}
+            popular={popular}
+            error={error}
+            loading={loading}
+         />
+      );
+   }
+```
+
+-  Do the same for the rest of the pages
+
+   -  Detail
+   -  Search
+   -  TV
+
+-  Search is a bit trickier because it requires some interactivity.
+   -  loading false > Search enter > loading true > put the results.
+
+## 1.5b Home Container
+
+-  We can now work on Home Container in detail.
+-  Between state and render, you create componentDidMount() that transfer the API data to the Container.
+-  try...catch...finally.
+
+HomeContainer.js:
+
+```js
+   async componentDidMount() {
+      try {
+         const {
+            data: { results: nowPlaying },
+         } = await moviesApi.nowPlaying();
+         // setState with assigning nowPlaying variable with API nowPlaying data.
+         this.setState({
+            nowPlaying,
+         });
+      } catch {
+         this.setState({
+            error: "Can't find movies information",
+         });
+      } finally {
+         this.setState({
+            loading: false,
+         });
+      }
+   }
+```
+
+-  **async...await**: needs to be used because it might take some time to get the data. If React continues on to the next code, it might ignore the data even if the data is retrieved later.
+
+-  _Async needs to be used along with await or it is not going to work._
+
+## 1.5c TV Container.
+
+-  TV container is similar with the Home container. Therefore, we will skip the details. Please refer to the code below:
+   -  Import tvApi from api.js
+   -  Create compoenetDidMount() to retrieve the data from API.
+   -  setState()
+
+```js
+   async componentDidMount() {
+      try {
+         const {
+            data: { results: topRated },
+         } = await tvApi.topRated();
+         const {
+            data: { results: popular },
+         } = await tvApi.popular();
+         const {
+            data: { results: airingToday },
+         } = await tvApi.airingToday();
+         this.setState({ topRated, popular, airingToday });
+      } catch {
+         this.setState({
+            error: "Can't find TV information.",
+         });
+      } finally {
+         this.setState({ loading: false });
+      }
+   }
+```
+
+## 1.5d Search Container
+
+**Search container logic:**
+
+1. Handle submit > Check the search term is not blank
+
+```js
+const { searchTerm } = this.state;
+if (searchTerm !== "") {
+   this.searchByTerm();
+}
+```
+
+2. Get the searchTerm > Find related information > Display the information retrieved.
+
+```js
+  searchByTerm = async () => {
+      const { searchTerm } = this.state;
+      this.setState({ loading: true });
+      try {
+         // Use the searchTerm to request for Search API grab the results.
+         const {
+            data: { results: movieResults },
+         } = await moviesApi.search(searchTerm);
+         const {
+            data: { results: tvResults },
+         } = await tvApi.search(searchTerm);
+
+         // Set the State and assign API data to currentState variables.
+         this.setState({
+            movieResults,
+            tvResults,
+         });
+      } catch {
+         this.setState({ error: "Can't find results." });
+      } finally {
+         this.setState({ loading: false });
+      }
+   };
+   render() {
+      const { movieResults, tvResults, searchTerm, loading, error } =
+         this.state;
+      return (
+         <SearchPresenter
+            movieResults={movieResults}
+            tvResults={tvResults}
+            searchTerm={searchTerm}
+            loading={loading}
+            error={error}
+            handleSubmit={this.handleSubmit}
+         />
+      );
+   }
+```
+
+-  Set the route for the Detail pages. The user will have options to choose either a movie or a TV show. Once they make a selection, we will route them to different detail pages such as /movie or /show and create a unique pages based on the movie ID that they clicked.
+
+Router.js
+
+```js
+<Route path="/movie/:id" component={Detail} />
+<Route path="/show/:id" component={Detail} />
+```
+
+## 1.5e Detail Container
+
+-  Header component was aware of the location of our router because we were decorating it with withRouter funciton.
+-  We do not have to do this with detail because by deafult, React router is going to give all the information to the routes by giving props.
+   -  Test: When you console.log(this.props) from the Detail Container, we may view the information that was sent from the router.
+
+Set up Detail Container:
+
+Steps:
+
+1. Find out whether you are in /movie or /show because both goes to the same component.
+2. We need to know the numbers in the props.
+
+-  props.match.params contains id that we can extract.
+
+-  With props, you can do goBack, goForward etc.
+
+```js
+// gets the id from this.props.
+async componentDidMount() {
+   const {
+      match: {
+         params: { id },
+      },
+      history: { push },
+   } = this.props;
+
+   // parse id from string to int.
+   const parsedId = parseInt(id);
+   // check for null. If null, send users to home("/").
+   if (isNaN(parsedId)) {
+      return push("/");
+   }
+}
+```
+
+-  Get the path from this.prop and check whether it includes() _movie_ or _show_.
+-  We can set up a constructor for props also.
+
+```js
+  constructor(props) {
+    super(props);
+    const {
+      location: { pathname }
+    } = props;
+    this.state = {
+      result: null,
+      error: null,
+      loading: true,
+      isMovie: pathname.includes("/movie/")
+    };
+  }
+```
+
+-  ComponentDidMount() will check the pathname and if it is a movie, it will get the data from the movieDetail API. If it is not a movie, it will get TVApi.
+
+ComponentDidMount():
+
+```js
+let result = null;
+try {
+   if (isMovie) {
+      const request = await moviesApi.movieDetail(parsedId);
+      result = request.data;
+   } else {
+      const request = await tvApi.showDetail(parsedId);
+      result = request.data;
+   }
+} catch {
+   this.setState({ error: "Can't find anything." });
+} finally {
+   this.setState({ loading: false, result });
+}
+```
+
+_Tip: result.data is same as {data: result} in JS by the same token as deconstructuring (const {value} trick)_
