@@ -12,13 +12,22 @@ export default class extends React.Component {
    };
 
    // Check for a blank form.
-   handleSubmit = () => {
+   handleSubmit = (event) => {
+      event.preventDefault();
       const { searchTerm } = this.state;
       if (searchTerm !== "") {
          this.searchByTerm();
       }
    };
 
+   updateTerm = (event) => {
+      const {
+         target: { value },
+      } = event;
+      this.setState({
+         searchTerm: value,
+      });
+   };
    //
    searchByTerm = async () => {
       const { searchTerm } = this.state;
@@ -50,9 +59,9 @@ export default class extends React.Component {
          <SearchPresenter
             movieResults={movieResults}
             tvResults={tvResults}
-            searchTerm={searchTerm}
             loading={loading}
             error={error}
+            searchTerm={searchTerm}
             handleSubmit={this.handleSubmit}
          />
       );

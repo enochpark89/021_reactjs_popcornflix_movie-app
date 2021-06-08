@@ -608,3 +608,98 @@ try {
 ```
 
 _Tip: result.data is same as {data: result} in JS by the same token as deconstructuring (const {value} trick)_
+
+# 2.0 Presenter
+
+## 2.1 Presenter Structure
+
+-  Each presenter is imported and modified as below
+
+TVPresenter.js
+
+```js
+import React from "react";
+import PropTypes from "prop-types";
+import styled from "styled-components";
+
+const TVPresenter = ({ topRated, popular, airingToday, loading, error }) =>
+   null;
+
+TVPresenter.propTypes = {
+   topRated: PropTypes.array,
+   popular: PropTypes.array,
+   airingToday: PropTypes.array,
+   loading: PropTypes.bool.isRequired,
+   error: PropTypes.string,
+};
+
+export default TVPresenter;
+```
+
+-  Other presenters follow the similar pattern. It requires the check on the props so that no wrong information is presented.
+
+   -  Please refer to Detail, home, Search, TV presenters.js files for details.
+
+-  Next, we have to create more componenets and start rendering movies with JSX and CSS.
+
+## 2.2 Presenter Structure
+
+-  We are going to create componenets for the presenters.
+
+   -  path: src/components.
+
+-  We create the styled component in the componenet folder and then use those .js files from the Presenters.
+
+HomePresenter.js
+
+```javascript
+const HomePresenter = ({ nowPlaying, popular, upcoming, loading, error }) =>
+   loading ? null : (
+      // Three sections presents the title of the movies retrieved from API.
+      <Container>
+         {nowPlaying && nowPlaying.length > 0 && (
+            <Section title="Now Playing">
+               {nowPlaying.map((movie) => movie.title)}
+            </Section>
+         )}
+         {upcoming && upcoming.length > 0 && (
+            <Section title="Upcoming Movies">
+               {upcoming.map((movie) => movie.title)}
+            </Section>
+         )}
+         {popular && popular.length > 0 && (
+            <Section title="Popular Movies">
+               {popular.map((movie) => movie.title)}
+            </Section>
+         )}
+      </Container>
+   );
+```
+
+## 2.2 TVPresenter and Loader Components
+
+-  We follow the similar style for the TVPresenter.
+
+-  Loader is added. This Loader will show a clock until the data is retrieved.
+
+_Tip: It is always important to make a loader because there is going to be delay until you process the data. Also, it is a good indication to the user that it is being processed_
+
+_Please refer to the TVpresenter.js for details._
+
+Grid is added on the constant Grid to display posters of movies and TV shows.
+
+Section.js (Styled Component)
+
+```js
+const Grid = styled.div`
+   margin-top: 25px;
+   display: grid;
+   grid-template-columns: repeat(auto-fill, 125px);
+   grid-gap: 25px;
+`;
+// Output: the titles are displayed within a stated column (top to bottom)
+```
+
+## 2.3 SearchPresenter
+
+-  Need to have container and form. This will intercept the event. Also, styled input.
