@@ -11,7 +11,6 @@ export default class extends React.Component {
       error: null,
    };
 
-   // Check for a blank form.
    handleSubmit = (event) => {
       event.preventDefault();
       const { searchTerm } = this.state;
@@ -20,6 +19,7 @@ export default class extends React.Component {
       }
    };
 
+   // value get only one letter but you can change this
    updateTerm = (event) => {
       const {
          target: { value },
@@ -28,20 +28,17 @@ export default class extends React.Component {
          searchTerm: value,
       });
    };
-   //
+
    searchByTerm = async () => {
       const { searchTerm } = this.state;
       this.setState({ loading: true });
       try {
-         // Use the searchTerm to request for Search API grab the results.
          const {
             data: { results: movieResults },
          } = await moviesApi.search(searchTerm);
          const {
             data: { results: tvResults },
          } = await tvApi.search(searchTerm);
-
-         // Set the State and assign API data to currentState variables.
          this.setState({
             movieResults,
             tvResults,
@@ -52,6 +49,7 @@ export default class extends React.Component {
          this.setState({ loading: false });
       }
    };
+
    render() {
       const { movieResults, tvResults, searchTerm, loading, error } =
          this.state;
@@ -63,6 +61,7 @@ export default class extends React.Component {
             error={error}
             searchTerm={searchTerm}
             handleSubmit={this.handleSubmit}
+            updateTerm={this.updateTerm}
          />
       );
    }

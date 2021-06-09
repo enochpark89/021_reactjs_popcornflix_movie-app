@@ -703,3 +703,168 @@ const Grid = styled.div`
 ## 2.3 SearchPresenter
 
 -  Need to have container and form. This will intercept the event. Also, styled input.
+
+## 2.4 Message components
+
+-  Create error text and not found text.
+
+1. Create Components/Message.js
+
+Message.js
+
+```js
+import React from "react";
+import PropTypes from "prop-types";
+import styled from "styled-components";
+
+const Container = styled.div`
+   width: 100vw;
+   display: flex;
+   justify-content: center;
+`;
+
+const Text = styled.span`
+   color: ${(props) => props.color};
+`;
+
+const Message = ({ text, color }) => (
+   <Container>
+      <Text color={color}>{text}</Text>
+   </Container>
+);
+
+Message.propTypes = {
+   text: PropTypes.string.isRequired,
+   color: PropTypes.string.isRequired,
+};
+
+export default Message;
+```
+
+2. This message.js can be used in any presenters as below:
+   HomePresenter.js:
+
+```js
+// suppose that there is an error props.
+{
+   error && <Message color="#e74c3c" text={error} />;
+}
+```
+
+## 2.5 Poster components
+
+1. Create Components/Poster.js
+   -  const Poster
+   -  Poster.propTypes
+
+_Please refer to the Poster.js for detail..._
+
+2. Add <Poster /> instead of the movie.id and movie.title.
+
+HomePresenter.js
+
+```js
+<Poster />
+```
+
+3. Send API information to Poster from three presenters.
+
+```js
+const Poster = ({ id, imageUrl, title, rating, year, isMovie = false }) => (
+   <Link to={isMovie ? `/movie/${id}` : `/show/${id}`}>
+      <Container>
+         <ImageContainer>
+            <Image bgUrl={imageUrl} />
+            <Rating>
+               <span role="img" aria-label="rating">
+                  ⭐️
+               </span>{" "}
+               {rating}/10
+            </Rating>
+         </ImageContainer>
+         <Title>{title}</Title>
+         <Year>{year}</Year>
+      </Container>
+   </Link>
+);
+```
+
+4. Styling
+
+a. Create the display block for the movie posters
+
+Poster.js
+
+```js
+const Image = styled.div`
+   background-image: url(${(props) => props.bgUrl});
+   height: 180px;
+   background-size: cover;
+   border-radius: 4px;
+   background-position: center center;
+   transition: opacity 0.1s linear;
+`;
+```
+
+b. All other components need to be stylized using your own wits.
+c. In order to show the picture using the URL, we need to add the URL in front and concatenate with the props.bgURL as below:
+
+```js
+<Image
+   bgUrl={
+      imageUrl
+         ? `https://image.tmdb.org/t/p/w300${imageUrl}`
+         : require("../assets/noPosterSmall.png")
+   }
+/>
+```
+
+## 2.6 Detail Container.
+
+-  There should be one container that shows the detail.
+-  It has to be related to the movie specific to the one that user selected.
+
+-  Componenets:
+
+   -  Container
+   -  Backdrop ( I left out backdrop.)
+   -  Content
+   -  Cover
+
+-  For the Data, we have to check whether it is a /movie or /TVshow.
+   DetailPresenter.js
+
+```js
+<Data>
+   <Title>
+      {result.original_title ? result.original_title : result.original_name}
+   </Title>
+   <ItemContainer>
+      <Item>
+         {result.release_date
+            ? result.release_date.substring(0, 4)
+            : result.first_air_date.substring(0, 4)}
+      </Item>
+      <Divider>•</Divider>
+      <Item>{result.runtime || result.episode_run_time} min</Item>
+      <Divider>•</Divider>
+      <Item>
+         {result.genres &&
+            result.genres.map((genre, index) =>
+               index === result.genres.length - 1
+                  ? genre.name
+                  : `${genre.name} / `
+            )}
+      </Item>
+   </ItemContainer>
+   <Overview>{result.overview}</Overview>
+</Data>
+```
+
+_Tip: map() function has index that you can use._
+
+_Please refer to the DetailPresenter for detail._
+
+## 2.6 React Helmet
+
+-  You can use react-Helmet to set the head of your website easily.
