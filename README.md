@@ -868,3 +868,75 @@ _Please refer to the DetailPresenter for detail._
 ## 2.6 React Helmet
 
 -  You can use react-Helmet to set the head of your website easily.
+
+# 3.0 TypeScript with React
+
+-  TypeScript is a superset of JavaScript.
+-  It adds more features to JavaScript.
+-  TypeScript allows developers to make less mistakes.
+-  For example, in javascript, we have to write our own data validation in the function, but in typescript, we can make TS disable such inputs.
+
+```ts
+const plus = (a: number, b: number) => a + b;
+console.log(plus("lalalal", 2));
+// by stating the input types, uses cannot write any other types because the one that is specified. It raises an error and let the user know.
+```
+
+-  **When you mix TypeScript with JavaScript, you will be like a boss :)!**
+
+# 3.1 Typing
+
+**Typing**:
+
+-  TypeScript can also make the developer make less mistake by doing below by using _Typing_
+
+ex1: Typing example
+
+```ts
+let hello: string = "hello";
+hello = 4;
+// this is now allowed since you already stated the type of the const that you created.
+const plus = (a: number, b: number) => a + b;
+```
+
+**Typing return value**
+ex2:
+
+```ts
+const greet = (name:string, age:number):string => { return `Hello ${name} you are ${age} years old`)}
+// you can also specify what you are going to return. In this particular case, it is a string.
+```
+
+**Interface**
+
+-  interface is a shape of an object.
+
+```ts
+const enoch = {
+   name: "Enoch",
+   age: 18,
+   hungry: true,
+};
+
+interface IHuman {
+   name: string;
+   age: number;
+   hungry: boolean;
+}
+
+const helloToHuman = (human: IHuman) => {
+   console.log(`Hello ${human.name} you are ${human.age} old`);
+};
+
+helloToHuman(enoch);
+
+// Since TS now know what IHuman means because of the interface, it will print out the helloToHuman() function without an error.
+
+// TypeScript does not know what human is so it will give an error.
+```
+
+-  if you put the question mark on the variable inside the interface, it will create an optional value where undefined value is allowed.
+
+# 3.2 React State and TypeScript
+
+**I have excluded the TypeScript incorporation to React because it seems like an extra for me now. Once I become adept in React + hook, I can move on to using TypeScript. TS will give better security on the code in general because it states the types for returned arguments. (Also, it becomes easy for developer to notice errors)**
